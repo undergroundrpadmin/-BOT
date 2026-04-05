@@ -5,6 +5,33 @@ const ultimaActividad = new Map(); // userId -> timestamp
 
 const ROL_OD_ID = '1490159958006824960';
 
+const FRASES_INACTIVIDAD = [
+  'Las calles no esperan a nadie. Tu organización te necesita activo.',
+  'Se detectó tu ausencia. En este mundo, desaparecer tiene consecuencias.',
+  'Los que no aparecen, son olvidados. No dejes que eso te pase.',
+  'Tu silencio está siendo notado. Volvé antes de que sea tarde.',
+  'En UGRP, la inactividad es una señal de debilidad. Demostrá lo contrario.',
+  'Alguien preguntó por vos. No hagas esperar a tu gente.',
+  'El tiempo corre y vos no aparecés. ¿Todo bien del otro lado?',
+  'Las organizaciones se construyen con presencia. La tuya te extraña.',
+  'Un fantasma no puede liderar ni seguir. Aparecé.',
+  'La calle no perdona la ausencia. Recordá que tenés un lugar acá.',
+  'Tu inactividad fue registrada. Esto es un aviso, no una amenaza... todavía.',
+  'En este negocio, el que no aparece, pierde su lugar.',
+  'Se te está buscando. Más vale que sea por buenas razones.',
+  'Días sin verte. Tu organización sigue en pie, ¿y vos?',
+  'El mundo sigue girando aunque vos no estés. Pero tu lugar podría no esperarte.',
+  'Ausencia prolongada detectada. Considerá esto una llamada de atención.',
+  'No sabemos si estás o no estás. Eso es un problema.',
+  'Tu organización no puede cubrirte para siempre. Aparecé.',
+  'Los inactivos son los primeros en ser reemplazados. No seas uno de ellos.',
+  'Este es un recordatorio amistoso: existís, y se nota cuando no estás.',
+  'La lealtad se demuestra con presencia. ¿Dónde estás?',
+  'Días de silencio. En UGRP eso no pasa desapercibido.',
+  'Tu lugar sigue siendo tuyo, pero no por mucho tiempo si no aparecés.',
+  'Se registró inactividad en tu cuenta. Volvé al ruedo antes de que te saquen de él.',
+];
+
 module.exports = {
   ultimaActividad,
 
@@ -42,10 +69,20 @@ module.exports = {
       );
 
       const inactivos = [];
+      const frasesUsadas = new Set();
+
       for (const [, miembro] of miembrosOD) {
         const ultima = ultimaActividad.get(miembro.id);
         if (!ultima || ultima < limite) {
           inactivos.push({ id: miembro.id, ultima });
+
+          // Enviar DM con frase aleatoria sin repetir hasta agotar todas
+          if (frasesUsadas.size >= FRASES_INACTIVIDAD.length) frasesUsadas.clear();
+          let idx;
+          do { idx = Math.floor(Math.random() * FRASES_INACTIVIDAD.length); } while (frasesUsadas.has(idx));
+          frasesUsadas.add(idx);
+
+          miembro.send(`> *${FRASES_INACTIVIDAD[idx]}*\n\n— OD UGRP`).catch(() => {});
         }
       }
 
