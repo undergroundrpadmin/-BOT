@@ -72,6 +72,19 @@ async function configurarPermisoRolOD(guild) {
   }
 }
 
+// Quitar rol Perkin cuando termina el timeout
+client.on(Events.GuildMemberUpdate, async (oldMember, newMember) => {
+  const teniaSuspension = oldMember.communicationDisabledUntilTimestamp > Date.now();
+  const yaNoTiene = !newMember.communicationDisabledUntilTimestamp || newMember.communicationDisabledUntilTimestamp <= Date.now();
+  if (teniaSuspension && yaNoTiene) {
+    const rolPerkin = newMember.guild.roles.cache.find(r => r.name === 'Perkin');
+    if (rolPerkin && newMember.roles.cache.has(rolPerkin.id)) {
+      await newMember.roles.remove(rolPerkin).catch(() => {});
+      await sendLog(newMember.guild, 'Suspension terminada', `El timeout de <@${newMember.id}> termino. Rol Perkin removido.`, 0x57f287);
+    }
+  }
+});
+
 client.once(Events.ClientReady, async () => {
   console.log(`Bot conectado como ${client.user.tag}`);
   const guild = client.guilds.cache.get(process.env.GUILD_ID);
