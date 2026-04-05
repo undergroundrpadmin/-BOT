@@ -57,15 +57,17 @@ async function configurarPermisoRolOD(guild) {
   if (!rol) return;
 
   for (const [, canal] of guild.channels.cache) {
+    if (canal.type === 4) continue; // saltar categorias
+
     if (canal.parentId === CATEGORIA_EXCLUIDA_ID) {
       // Denegar acceso a canales de la categoria excluida
-      await canal.permissionOverwrites.edit(rol, { ViewChannel: false }).catch(() => {});
-    } else if (!canal.parentId || canal.type === 4) {
-      // Saltar categorias
-      continue;
+      await canal.permissionOverwrites.edit(rol, { ViewChannel: false, SendMessages: false }).catch(() => {});
+    } else if (canal.id === '1490161234304303154') {
+      // Solo este canal puede escribir
+      await canal.permissionOverwrites.edit(rol, { ViewChannel: true, SendMessages: true }).catch(() => {});
     } else {
-      // Dar acceso al resto
-      await canal.permissionOverwrites.edit(rol, { ViewChannel: true }).catch(() => {});
+      // Ver pero no escribir en el resto
+      await canal.permissionOverwrites.edit(rol, { ViewChannel: true, SendMessages: false }).catch(() => {});
     }
   }
 }
