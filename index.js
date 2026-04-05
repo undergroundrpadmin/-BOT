@@ -23,7 +23,7 @@ for (const file of fs.readdirSync(path.join(__dirname, 'commands')).filter(f => 
 
 // Bienvenida automática
 client.on(Events.GuildMemberAdd, async (member) => {
-  const canal = member.guild.channels.cache.find(c => c.name === 'aduana-de-ingreso');
+  const canal = member.guild.channels.cache.get('1489121022580887655');
   if (canal) await canal.send(buildBienvenidaEmbed(member.user));
 });
 
