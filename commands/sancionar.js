@@ -3,7 +3,20 @@ const { sendLog } = require('../utils/helpers');
 
 const sanciones = new Map();
 
-const ROL_OD_ID = '1490159958006824960'; // userId -> [{ tipo, razon, fecha, moderador }]
+const ROL_OD_ID = '1490159958006824960';
+let rolPerkinId = null;
+
+async function getRolPerkin(guild) {
+  if (rolPerkinId) {
+    const rol = guild.roles.cache.get(rolPerkinId);
+    if (rol) return rol;
+  }
+  const existente = guild.roles.cache.find(r => r.name === 'Perkin');
+  if (existente) { rolPerkinId = existente.id; return existente; }
+  const nuevo = await guild.roles.create({ name: 'Perkin', color: 0x95a5a6, reason: 'Rol de suspension' });
+  rolPerkinId = nuevo.id;
+  return nuevo;
+}
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -67,11 +80,13 @@ module.exports = {
 
       await interaction.reply({ embeds: [embed] });
 
-      // Si es suspension, timeout de 12 horas
+      // Si es suspension, timeout de 12 horas y dar rol Perkin
       if (tipo === 'suspension') {
         const miembroGuild = await interaction.guild.members.fetch(miembro.id).catch(() => null);
         if (miembroGuild) {
           await miembroGuild.timeout(12 * 60 * 60 * 1000, razon).catch(() => {});
+          const rolPerkin = await getRolPerkin(interaction.guild);
+          await miembroGuild.roles.add(rolPerkin).catch(() => {});
         }
       }
 
@@ -118,6 +133,11 @@ module.exports = {
     if (sub === 'limpiar') {
       const miembro = interaction.options.getUser('miembro');
       sanciones.delete(miembro.id);
+      // Quitar rol Perkin si lo tiene
+      const miembroGuild = await interaction.guild.members.fetch(miembro.id).catch(() => null);
+      if (miembroGuild && rolPerkinId && miembroGuild.roles.cache.has(rolPerkinId)) {
+        await miembroGuild.roles.remove(rolPerkinId).catch(() => {});
+      }
       await interaction.reply({ content: `Sanciones de <@${miembro.id}> limpiadas.` });
       await sendLog(interaction.guild, '🧹 Sanciones limpiadas', `**${interaction.user.username}** limpio las sanciones de <@${miembro.id}>.`, 0x95a5a6);
       return;
