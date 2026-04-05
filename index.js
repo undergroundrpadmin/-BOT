@@ -49,7 +49,32 @@ client.on(Events.InteractionCreate, async (interaction) => {
   }
 });
 
-client.once(Events.ClientReady, () => console.log(`Bot conectado como ${client.user.tag}`));
+const ROL_OD_ID = '1490159958006824960';
+const CATEGORIA_EXCLUIDA_ID = '1489512122709970954';
+
+async function configurarPermisoRolOD(guild) {
+  const rol = guild.roles.cache.get(ROL_OD_ID);
+  if (!rol) return;
+
+  for (const [, canal] of guild.channels.cache) {
+    if (canal.parentId === CATEGORIA_EXCLUIDA_ID) {
+      // Denegar acceso a canales de la categoria excluida
+      await canal.permissionOverwrites.edit(rol, { ViewChannel: false }).catch(() => {});
+    } else if (!canal.parentId || canal.type === 4) {
+      // Saltar categorias
+      continue;
+    } else {
+      // Dar acceso al resto
+      await canal.permissionOverwrites.edit(rol, { ViewChannel: true }).catch(() => {});
+    }
+  }
+}
+
+client.once(Events.ClientReady, async () => {
+  console.log(`Bot conectado como ${client.user.tag}`);
+  const guild = client.guilds.cache.get(process.env.GUILD_ID);
+  if (guild) await configurarPermisoRolOD(guild);
+});
 
 process.on('unhandledRejection', err => console.error('Unhandled rejection:', err));
 
