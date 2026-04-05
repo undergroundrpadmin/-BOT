@@ -15,28 +15,24 @@ const client = new Client({
 
 client.commands = new Collection();
 
-// Cargar comandos
 for (const file of fs.readdirSync(path.join(__dirname, 'commands')).filter(f => f.endsWith('.js'))) {
   const cmd = require(`./commands/${file}`);
   if (cmd.data && cmd.execute) client.commands.set(cmd.data.name, cmd);
 }
 
-// Bienvenida automática
 client.on(Events.GuildMemberAdd, async (member) => {
   const canal = member.guild.channels.cache.get('1489121022580887655');
   if (canal) await canal.send(buildBienvenidaEmbed(member.user));
 });
 
-// Interacciones
 client.on(Events.InteractionCreate, async (interaction) => {
-  // Botón verificar
   if (interaction.isButton() && interaction.customId === 'verificar') {
     const rol = interaction.guild.roles.cache.get('1490160956662349947');
-    if (!rol) return interaction.reply({ content: '❌ No existe el rol "Ciudadano". Contacta a un admin.', ephemeral: true });
-    if (interaction.member.roles.cache.has(rol.id)) return interaction.reply({ content: 'Ya estás verificado/a.', ephemeral: true });
+    if (!rol) return interaction.reply({ content: 'No existe el rol Ciudadano. Contacta a un admin.', ephemeral: true });
+    if (interaction.member.roles.cache.has(rol.id)) return interaction.reply({ content: 'Ya estas verificado/a.', ephemeral: true });
     await interaction.member.roles.add(rol);
-    await interaction.reply({ content: '✅ Verificado/a correctamente. Bienvenido/a al servidor.', ephemeral: true });
-    await sendLog(interaction.guild, '✅ Verificación', `**${interaction.user.username}** se verificó.`, 0x57f287);
+    await interaction.reply({ content: 'Verificado/a correctamente. Bienvenido/a al servidor.', ephemeral: true });
+    await sendLog(interaction.guild, 'Verificacion', `**${interaction.user.username}** se verifico.`, 0x57f287);
     return;
   }
 
@@ -48,12 +44,12 @@ client.on(Events.InteractionCreate, async (interaction) => {
     await command.execute(interaction);
   } catch (err) {
     console.error(err);
-    const msg = { content: '❌ Error al ejecutar el comando.', ephemeral: true };
+    const msg = { content: 'Error al ejecutar el comando.', ephemeral: true };
     interaction.replied || interaction.deferred ? interaction.followUp(msg) : interaction.reply(msg);
   }
 });
 
-client.once(Events.ClientReady, () => console.log(`✅ Bot conectado como ${client.user.tag}`));
+client.once(Events.ClientReady, () => console.log(`Bot conectado como ${client.user.tag}`));
 
 process.on('unhandledRejection', err => console.error('Unhandled rejection:', err));
 
