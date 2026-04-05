@@ -1,0 +1,14 @@
+{
+  "name": "discord-bot-od",
+  "version": "1.0.0",
+  "description": "Bot de Organizaciones Delictuales UGRP",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "deploy": "node deploy-commands.js"
+  },
+  "dependencies": {
+    "discord.js": "^14.26.2",
+    "dotenv": "^16.6.1"
+  }
+}
