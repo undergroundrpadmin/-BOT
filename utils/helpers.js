@@ -34,7 +34,7 @@ function buildBienvenidaEmbed(user) {
 }
 
 async function sendLog(guild, titulo, descripcion, color = 0x95a5a6) {
-  const canal = guild.channels.cache.find(c => c.name === 'logs-bot');
+  const canal = guild.channels.cache.get('1490168101294051430');
   if (!canal) return;
   await canal.send({
     embeds: [

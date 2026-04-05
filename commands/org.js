@@ -1,4 +1,5 @@
 const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } = require('discord.js');
+const { sendLog } = require('../utils/helpers');
 
 const organizaciones = new Map();
 
@@ -86,7 +87,10 @@ module.exports = {
         )
         .setColor(cfg.color)
         .setTimestamp();
-      return interaction.reply({ embeds: [embed] });
+
+      await interaction.reply({ embeds: [embed] });
+      await sendLog(interaction.guild, `${cfg.emoji} Org creada`, `**${interaction.user.username}** creo la org **${nombre}** (${tipo}) con lider <@${lider.id}>.`, cfg.color);
+      return;
     }
 
     if (sub === 'info') {
@@ -122,7 +126,9 @@ module.exports = {
         const miembroGuild = await interaction.guild.members.fetch(miembro.id);
         await miembroGuild.roles.add(org.rolId);
       }
-      return interaction.reply({ content: `<@${miembro.id}> agregado/a a **${org.nombre}**. (${org.miembros.length}/${cfg.max})` });
+      await interaction.reply({ content: `<@${miembro.id}> agregado/a a **${org.nombre}**. (${org.miembros.length}/${cfg.max})` });
+      await sendLog(interaction.guild, `${cfg.emoji} Miembro agregado`, `**${interaction.user.username}** agrego a <@${miembro.id}> a la org **${org.nombre}**. (${org.miembros.length}/${cfg.max})`, cfg.color);
+      return;
     }
 
     if (sub === 'remover') {
@@ -130,12 +136,15 @@ module.exports = {
       const miembro = interaction.options.getUser('miembro');
       const org = organizaciones.get(nombre.toLowerCase());
       if (!org) return interaction.reply({ content: `No existe la org **${nombre}**.`, ephemeral: true });
+      const cfg = TIPOS[org.tipo];
       org.miembros = org.miembros.filter(id => id !== miembro.id);
       if (org.rolId) {
         const miembroGuild = await interaction.guild.members.fetch(miembro.id);
         await miembroGuild.roles.remove(org.rolId);
       }
-      return interaction.reply({ content: `<@${miembro.id}> removido/a de **${org.nombre}**.` });
+      await interaction.reply({ content: `<@${miembro.id}> removido/a de **${org.nombre}**.` });
+      await sendLog(interaction.guild, `${cfg.emoji} Miembro removido`, `**${interaction.user.username}** removio a <@${miembro.id}> de la org **${org.nombre}**.`, cfg.color);
+      return;
     }
 
     if (sub === 'lista') {
