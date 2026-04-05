@@ -1,7 +1,9 @@
 const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } = require('discord.js');
 const { sendLog } = require('../utils/helpers');
 
-const sanciones = new Map(); // userId -> [{ tipo, razon, fecha, moderador }]
+const sanciones = new Map();
+
+const ROL_OD_ID = '1490159958006824960'; // userId -> [{ tipo, razon, fecha, moderador }]
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -64,6 +66,32 @@ module.exports = {
         .setTimestamp();
 
       await interaction.reply({ embeds: [embed] });
+
+      // Si es suspension, timeout de 12 horas
+      if (tipo === 'suspension') {
+        const miembroGuild = await interaction.guild.members.fetch(miembro.id).catch(() => null);
+        if (miembroGuild) {
+          await miembroGuild.timeout(12 * 60 * 60 * 1000, razon).catch(() => {});
+        }
+      }
+
+      // Si es expulsion, quitar rol OD y roles de org
+      if (tipo === 'expulsion') {
+        const miembroGuild = await interaction.guild.members.fetch(miembro.id).catch(() => null);
+        if (miembroGuild) {
+          // Quitar rol OD
+          if (miembroGuild.roles.cache.has(ROL_OD_ID)) await miembroGuild.roles.remove(ROL_OD_ID).catch(() => {});
+          // Quitar todos los roles que no sean del sistema
+          const rolesAQuitar = miembroGuild.roles.cache.filter(r =>
+            r.id !== interaction.guild.id && // no @everyone
+            r.id !== ROL_OD_ID // ya lo quitamos
+          );
+          for (const [, rol] of rolesAQuitar) {
+            await miembroGuild.roles.remove(rol).catch(() => {});
+          }
+        }
+      }
+
       await sendLog(interaction.guild, `${emojis[tipo]} Sancion`, `**${interaction.user.username}** sanciono a <@${miembro.id}> (${tipo}): ${razon}`, 0xe74c3c);
       return;
     }
