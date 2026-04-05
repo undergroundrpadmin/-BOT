@@ -72,6 +72,13 @@ async function configurarPermisoRolOD(guild) {
   }
 }
 
+// Tracking de actividad
+client.on(Events.MessageCreate, (message) => {
+  if (message.author.bot) return;
+  const { ultimaActividad } = require('./commands/inactividad');
+  ultimaActividad.set(message.author.id, Date.now());
+});
+
 // Quitar rol Perkin cuando termina el timeout
 client.on(Events.GuildMemberUpdate, async (oldMember, newMember) => {
   const teniaSuspension = oldMember.communicationDisabledUntilTimestamp > Date.now();
