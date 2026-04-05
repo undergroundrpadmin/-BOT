@@ -31,8 +31,8 @@ client.on(Events.GuildMemberAdd, async (member) => {
 client.on(Events.InteractionCreate, async (interaction) => {
   // Botón verificar
   if (interaction.isButton() && interaction.customId === 'verificar') {
-    const rol = interaction.guild.roles.cache.find(r => r.name === 'OD');
-    if (!rol) return interaction.reply({ content: '❌ No existe el rol "OD". Contacta a un admin.', ephemeral: true });
+    const rol = interaction.guild.roles.cache.get('1490160956662349947');
+    if (!rol) return interaction.reply({ content: '❌ No existe el rol "Ciudadano". Contacta a un admin.', ephemeral: true });
     if (interaction.member.roles.cache.has(rol.id)) return interaction.reply({ content: 'Ya estás verificado/a.', ephemeral: true });
     await interaction.member.roles.add(rol);
     await interaction.reply({ content: '✅ Verificado/a correctamente. Bienvenido/a al servidor.', ephemeral: true });
