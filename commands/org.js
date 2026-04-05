@@ -47,7 +47,6 @@ module.exports = {
       .setName('crear')
       .setDescription('Crear una organizacion')
       .addStringOption(o => o.setName('nombre').setDescription('Nombre de la org').setRequired(true))
-      .addStringOption(o => o.setName('iniciales').setDescription('Iniciales de la org (ej: LCN)').setRequired(true))
       .addUserOption(o => o.setName('lider').setDescription('Lider de la org').setRequired(true))
       .addStringOption(o => o
         .setName('tipo')
@@ -103,7 +102,7 @@ module.exports = {
 
     if (sub === 'crear') {
       const nombre = interaction.options.getString('nombre');
-      const iniciales = interaction.options.getString('iniciales').toUpperCase();
+      const iniciales = nombre.split(' ').map(p => p[0]).join('').toUpperCase();
       const lider = interaction.options.getUser('lider');
       const tipo = interaction.options.getString('tipo');
       const cfg = TIPOS[tipo];
